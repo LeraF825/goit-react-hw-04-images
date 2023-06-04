@@ -17,7 +17,7 @@ export const ImageGallery =({search})=> {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalData, setModalData] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(()=>{
     if (search !== searchCopy) {
@@ -60,16 +60,14 @@ export const ImageGallery =({search})=> {
    setPage(prevPage => (prevPage + 1));
   };
 
-  const openModal = () => {
-    setIsModalOpen(true)
-  };
+  
 
   const handleOpenModal = data => {
     setModalData(data);
   };
 
   const closeModal = () => {
-   setIsModalOpen(null)
+   setModalData(null)
   };
 
     return (
