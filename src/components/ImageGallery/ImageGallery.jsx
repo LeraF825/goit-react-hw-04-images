@@ -1,6 +1,6 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import s from './ImageGallery.module.css';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { getSearchImages } from 'services/api';
 import { Button } from 'components/Button/Button';
 import { Modal } from 'components/Modal/Modal';
@@ -8,78 +8,69 @@ import { Loader } from 'components/Loader/Loader';
 import Notiflix from 'notiflix';
 
 
-export class ImageGallery extends Component {
-  state = {
-    images: [],
-    page: 1,
-    searchCopy: null,
-    totalResults: 0,
-    error: null,
-    isLoading: false,
-    modalData: null,
-    isModalOpen: false,
-  };
+export const ImageGallery =({search})=> {
 
-  static getDerivedStateFromProps(props, state) {
-    if (props.search !== state.searchCopy) {
-      return { page: 1, searchCopy: props.search };
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [searchCopy, setSearchCopy] = useState(null);
+  const [totalResults, setTotalResults] = useState(0);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalData, setModalData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(()=>{
+    if (search !== searchCopy) {
+      setPage(1);
+      setSearchCopy(search);
     }
-    return null;
-  }
+  },[search,searchCopy]) 
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevProps.search !== this.props.search ||
-      prevState.page !== this.state.page
-    ) {
-      this.getSeacrhImg();
-    }
-  }
-
-  getSeacrhImg = () => {
-    this.setState({ isLoading: true, error: null });
-    getSearchImages(this.props.search, this.state.page)
+ useEffect(()=>{
+  const getSeacrhImg = () => {
+    setIsLoading(true);
+    setError(null);
+    getSearchImages(search, page)
       .then(imagesInfo =>{
         if (imagesInfo.totalHits === 0) {
           Notiflix.Report.info('😪 Oh, no',
             'Sorry, there are no images matching your search query. Please try again.',
           );}
-        this.setState(prevState => ({
-          images:
-            this.state.page === 1
-              ? imagesInfo.hits
-              : [...prevState.images, ...imagesInfo.hits],
-          totalResults: imagesInfo.totalHits,
-        }))
-      })
-      .catch(err => this.setState({ error: err.message }))
+        setImages(prevImages =>{
+          if(page === 1){
+            return imagesInfo.hits
+          } else{
+            return [...prevImages, ...imagesInfo.hits]
+          } 
+      });
+      setTotalResults(imagesInfo.totalHits);
+    })
+      .catch(err => setError( err.message))
       .finally(() => {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       });
   };
+  if(search){
+    getSeacrhImg()
+  }
+ },[search,page]);
+ 
 
-  changePage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const changePage = () => {
+   setPage(prevPage => (prevPage + 1));
   };
 
-  setModalData = modalData => {
-    this.setState({ modalData });
+  const openModal = () => {
+    setIsModalOpen(true)
   };
 
-  openModal = () => {
-    this.setState({ isModalOpen: true });
+  const handleOpenModal = data => {
+    setModalData(data);
   };
 
-  handleOpenModal = data => {
-    this.setModalData(data);
+  const closeModal = () => {
+   setIsModalOpen(null)
   };
-
-  closeModal = () => {
-    this.setState({ modalData: null });
-  };
-
-  render() {
-    const { images, isLoading, modalData, error, totalResults } = this.state;
 
     return (
       <>
@@ -92,14 +83,13 @@ export class ImageGallery extends Component {
             <ImageGalleryItem 
             image={image} 
             key={image.id} 
-            handleOpenModal={this.handleOpenModal}
+            handleOpenModal={handleOpenModal}
             />
           ))}
         </ul>
         )}
-        {totalResults > images.length && <Button onClick={this.changePage} />}
-        {modalData && <Modal modalData={modalData} closeModal={this.closeModal} />}
+        {totalResults > images.length && <Button onClick={changePage} />}
+        {modalData && <Modal modalData={modalData} closeModal={closeModal} />}
       </>
     );
   }
-}

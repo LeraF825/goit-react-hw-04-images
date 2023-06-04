@@ -1,29 +1,28 @@
 import s from './Modal.module.css';
-import { Component } from 'react';
+import {  useEffect } from 'react';
 
-export class Modal extends Component {
+export const Modal =({closeModal, modalData})=> {
 
-  handleBackdropClick = e => {
+  const handleBackdropClick = e => {
     if (e.target !== e.currentTarget) return;
-    this.props.closeModal();
+    closeModal();
   };
-  handleCloseByEsc = (e) => {
+ const handleCloseByEsc = (e) => {
     if (e.code !== "Escape") return;
-    this.props.closeModal();
+    closeModal();
   };
 
-  componentDidMount() {
-    window.addEventListener("keydown", this.handleCloseByEsc);
-  }
+  useEffect(()=>{
+    window.addEventListener("keydown", handleCloseByEsc);
+  }) 
 
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this.handleCloseByEsc);
-  }
+  useEffect(()=>{
+    window.removeEventListener("keydown", handleCloseByEsc);
+  }) 
 
-  render(){
-    const {url} = this.props.modalData;
+    const {url} = modalData;
     return (
-      <div className={s.overlay} onClick={this.handleBackdropClick}>
+      <div className={s.overlay} onClick={handleBackdropClick}>
         <div className={s.modal}>
           <img 
           src={url} 
@@ -33,4 +32,3 @@ export class Modal extends Component {
     );
   }
   
-};

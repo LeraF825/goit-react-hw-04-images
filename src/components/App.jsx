@@ -1,23 +1,22 @@
 import { Searchbar } from "./Searchbar/Searchbar";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import s from './App.module.css';
-import { Component } from "react";
+import { useState, useEffect } from "react";
 
-export class App extends Component {
-  state={
-   search:'',
-  }
-handleSearch = (search)=>{
-this.setState({search})
+export const App =()=> {
+  const [search, setSearch] = useState('');
+
+const handleSearch = (value)=>{
+setSearch(value)
 }
 
-  render(){
-    const {search}= this.state;
+useEffect(()=>{
+  setSearch('')
+},[])
     return (
       <div className={s.container}>
-        <Searchbar handleSearch={this.handleSearch}/>
+        <Searchbar handleSearch={handleSearch}/>
         <ImageGallery search={search}/>
       </div>
     );
   }
-};
